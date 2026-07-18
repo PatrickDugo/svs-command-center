@@ -343,6 +343,21 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 
 <!-- SETUP -->
 <div id="t-setup" class="sec">
+  <div class="card" id="quickStart"><div class="ct">⚡ Quick start — the essentials, spread everywhere</div>
+    <div class="muted" style="margin-bottom:10px">Fill these and hit apply; everything below is optional fine-tuning.</div>
+    <div class="grid g2">
+      <div><label>Studio name</label><input id="qName" placeholder="Your Studio"></div>
+      <div><label>Owner</label><input id="qOwner"></div>
+      <div><label>Currency</label><select id="qCurrency" onchange="qCurPick()"></select></div>
+      <div id="qCurCustomWrap" style="display:none"><label>Custom symbol &amp; code</label><div class="row"><input id="qCurSym" placeholder="₵" style="flex:1;min-width:0"><input id="qCurCode" placeholder="GHS" style="flex:1;min-width:0"></div></div>
+      <div><label>Phone / WhatsApp</label><input id="qPhone"></div>
+      <div><label>Email</label><input id="qEmail"></div>
+      <div><label>Social handles (IG &amp; TikTok)</label><input id="qIg" placeholder="@yourhandle"></div>
+      <div><label>Location</label><input id="qLocation"></div>
+    </div>
+    <button class="btng btn" style="width:100%;margin-top:10px" onclick="quickApply()">Apply everywhere</button>
+  </div>
+  
   <div class="card"><div class="ct">Business setup · fill once, it feeds the whole dashboard</div>
     <div class="muted" style="margin-bottom:10px">These details flow into your header, invoices, the money split and the pricing table.</div>
     <div class="grid g2">
@@ -354,8 +369,19 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:5px}
       <div><label>Phone / WhatsApp</label><input id="sPhone"></div>
       <div><label>MoMo name &amp; number (on invoices)</label><input id="sMomo" placeholder="Studio name · MoMo number"></div>
       <div><label>Social handles — shown on invoices, docs &amp; pitch deck</label><input id="sIg" placeholder="@yourhandle (IG &amp; TikTok)"></div>
-      <div><label>Currency code</label><input id="sCurrency"></div>
+      <div><label>Currency</label><select id="sCurrency" onchange="curPick()"></select></div>
+      <div id="sCurCustom" style="display:none"><label>Custom symbol &amp; code</label><div class="row"><input id="sCurSym" placeholder="₵" style="flex:1;min-width:0"><input id="sCurCode" placeholder="GHS" style="flex:1;min-width:0"></div></div>
     </div>
+  </div>
+  <div class="card"><div class="ct">Brand logo</div>
+    <div class="muted" style="margin-bottom:9px">Square PNG/SVG, ideally transparent, under ~400 KB. Shows in the header, watermark &amp; documents. No image? Use an auto monogram from your studio name.</div>
+    <div class="qa">
+      <input type="file" id="logoFile" accept="image/*" style="display:none" onchange="logoUpload(event)">
+      <button class="btn" onclick="document.getElementById('logoFile').click()">⍒ Upload image</button>
+      <button class="btn" onclick="logoText()">Aa Text monogram</button>
+      <button class="btn" onclick="logoReset()">↺ Reset to default</button>
+    </div>
+    <div id="logoPrev" class="muted" style="margin-top:8px"></div>
   </div>
   <div class="card"><div class="ct">Money split — feeds every payment</div>
     <div class="grid g4">
@@ -416,7 +442,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:5px}
     <div class="grid g4" id="moneyFunds"></div><div class="dv"></div>
     <div class="split-row"><span class="muted">Total revenue (all time)</span><strong id="totRev">GHS 0</strong></div>
     <div class="split-row"><span class="muted">Total spent</span><strong id="totExp">GHS 0</strong></div></div>
-  <div class="card"><div class="ct">Ledger</div><div style="overflow-x:auto"><table><thead><tr><th>Date</th><th>Description</th><th>Fund</th><th>In/Out</th><th>GHS</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></div>
+  <div class="card"><div class="ct">Ledger</div><div style="overflow-x:auto"><table><thead><tr><th>Date</th><th>Description</th><th>Fund</th><th>In/Out</th><th><span class="curcode">GHS</span></th></tr></thead><tbody id="ledgerBody"></tbody></table></div></div>
   <div class="card"><details class="part"><summary>📊 Insights</summary><div id="analytics"></div></details></div>
   <div class="card"><div class="ct">The split &amp; the rules</div>
     <div class="split-row"><span>Personal → Bank Account 1</span><strong style="color:var(--blue)" id="sp_p">50%</strong></div>
@@ -566,7 +592,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:5px}
   <div class="grid g2"><div><label>Email</label><input id="cEmail"></div><div><label>Package</label><select id="cType" onchange="fillFee()">
     <option value="Brand & Content">Brand & Content</option><option value="Corporate & Headshots">Corporate & Headshots</option>
     <option value="Events & Celebrations">Events & Celebrations</option><option value="Weddings">Weddings</option></select></div></div>
-  <div class="grid g2"><div><label>Total fee (GHS)</label><input id="cFee" type="number" oninput="syncDep()"></div><div><label>Deposit due (50%)</label><input id="cDep" type="number"></div></div>
+  <div class="grid g2"><div><label>Total fee (<span class="curcode">GHS</span>)</label><input id="cFee" type="number" oninput="syncDep()"></div><div><label>Deposit due (50%)</label><input id="cDep" type="number"></div></div>
   <div class="grid g2"><div><label>Event date</label><input id="cDate" type="date"></div><div><label>Venue</label><input id="cVenue"></div></div>
   <div class="grid g2"><div><label>Start time</label><input id="cStart" type="time"></div><div><label>Expected end time</label><input id="cEnd" type="time"></div></div>
   <div class="grid g2"><div><label>Edited images promised</label><input id="cImages" type="number" placeholder="e.g. 40"></div><div><label>Delivery within (days)</label><input id="cDays" type="number" placeholder="auto by package"></div></div>
@@ -577,7 +603,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 
 <div class="modal" id="m-pay"><div class="mbox">
   <div class="mt">Record payment</div><label>Client</label><select id="pClient" onchange="pPrefill()"></select>
-  <div class="grid g2"><div><label>Amount (GHS)</label><input id="pAmt" type="number" oninput="previewSplit()"></div>
+  <div class="grid g2"><div><label>Amount (<span class="curcode">GHS</span>)</label><input id="pAmt" type="number" oninput="previewSplit()"></div>
   <div><label>Type</label><select id="pKind"><option>Deposit</option><option>Balance</option><option>Full payment</option><option>Retainer</option><option>Other income</option></select></div></div>
   <label>Date</label><input id="pDate" type="date">
   <div class="card" style="margin-top:10px;background:var(--bg2)"><div class="ct">Auto-split preview</div>
@@ -601,7 +627,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 
 <div class="modal" id="m-exp"><div class="mbox">
   <div class="mt">Add expense</div><label>Description</label><input id="eDesc" placeholder="e.g. Godox SL60W LED">
-  <div class="grid g2"><div><label>Amount (GHS)</label><input id="eAmt" type="number"></div>
+  <div class="grid g2"><div><label>Amount (<span class="curcode">GHS</span>)</label><input id="eAmt" type="number"></div>
   <div><label>From fund</label><select id="eFund"><option>Studio Growth</option><option>Personal</option><option>Emergency Buffer</option><option>Tax Provision</option></select></div></div>
   <label>Date</label><input id="eDate" type="date">
   <div class="row" style="margin-top:12px;justify-content:flex-end"><button class="btn" onclick="close_('m-exp')">Cancel</button><button class="btnp btn" onclick="saveExp()">Save</button></div>
@@ -662,7 +688,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 var KEY='scc_state';
 var FUNDS=['Personal','Studio Growth','Tax Provision','Emergency Buffer'];
 var EPROJ='';
-function defProfile(){return{name:'Your Studio',owner:'',tagline:'',email:'',phone:'',momo:'',location:'',ig:'',currency:'GHS',split:{Personal:50,'Studio Growth':20,'Tax Provision':15,'Emergency Buffer':15},milestones:[10000,15000,20000,25000,30000,40000],packages:[{name:'Brand & Content',price:1500},{name:'Corporate & Headshots',price:2500},{name:'Events & Celebrations',price:3500},{name:'Weddings',price:8000}],configured:false};}
+function defProfile(){return{name:'Your Studio',owner:'',tagline:'',email:'',phone:'',momo:'',location:'',ig:'',currency:'GHS',currencySymbol:'₵',logo:'text',split:{Personal:50,'Studio Growth':20,'Tax Provision':15,'Emergency Buffer':15},milestones:[10000,15000,20000,25000,30000,40000],packages:[{name:'Brand & Content',price:1500},{name:'Corporate & Headshots',price:2500},{name:'Events & Celebrations',price:3500},{name:'Weddings',price:8000}],configured:false};}
 function pkgPrice(n){var p=(S.profile.packages||[]).find(function(x){return x.name===n;});return p?p.price:0;}
 function splitFrac(f){return (S.profile.split[f]||0)/100;}
 function blank(){return{clients:[],ledger:[],gig:{count:0,pct:15},month:0,ideas:{},backups:[],subs:[],risks:{},tasks:{},tasksSeeded:false,profile:defProfile(),edit:{shoot:'',loc:'default',d1:'',d2:'',d3:'',custom:'',done:{}},prop:{clientId:'',clientName:'',title:'',ideas:[]}};}
@@ -829,7 +855,7 @@ function resetAL(){ if(!CK)return; clearTimeout(alTimer); alTimer=setTimeout(loc
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function today(){return new Date().toISOString().slice(0,10);}
-function ghs(n){return ((S.profile&&S.profile.currency)||'GHS')+' '+Math.round(n).toLocaleString();}
+function ghs(n){var p=S.profile||{};var sy=p.currencySymbol||p.currency||'GHS';var sep=/^[A-Za-z]/.test(sy)?' ':'';return sy+sep+Math.round(n).toLocaleString();}
 function $(id){return document.getElementById(id);}
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2600);}
 var GROUPS={today:['t-home'],clients:['t-pipe','t-cal','t-subs'],money:['t-money','t-growth'],studio:['t-editing','t-video','t-backup','t-risk'],grow:['t-mplan','t-plan','t-tasks','t-course'],setup:['t-setup']};function show(el,key){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('on');});if(el)el.classList.add('on');(GROUPS[key]||[key]).forEach(function(id){var e=$(id);if(e)e.classList.add('on');});renderAll();try{window.scrollTo(0,0);}catch(e){}}
@@ -1158,10 +1184,10 @@ var DATA2=[
 ];
 function togTask2(k){S.tasks[k]=!S.tasks[k];save();renderTasks();}
 function renderTasks(){var done=0,tot=0;$('taskGroups').innerHTML=DATA2.map(function(g,gi){var gd=0;var rows=g[2].map(function(it,i){var k='t'+gi+'_'+i;var on=!!S.tasks[k];if(on){done++;gd++;}tot++;return '<div class="item '+(on?'dn':'')+'" onclick="togTask2(\''+k+'\')"><div class="cb '+(on?'on':'')+'">✓</div><div class="il">'+it[0]+'</div></div>';}).join('');return '<div style="margin-bottom:14px"><div class="ct" style="margin-bottom:6px"><span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+g[1]+';margin-right:6px"></span>'+g[0]+'</span><span>'+gd+'/'+g[2].length+'</span></div>'+rows+'</div>';}).join('');var pct=tot?Math.round(done/tot*100):0;$('tkDone').textContent=done;$('tkLeft').textContent=(tot-done);$('tkPct').textContent=pct+'%';$('tkBar').style.width=pct+'%';}
-function renderHeader(){var p=S.profile;$('hdrName').textContent=(p.name||'SVS').toUpperCase()+' — COMMAND CENTER';$('hdrSub').textContent=[p.owner,p.location,p.tagline].filter(Boolean).join(' · ').toUpperCase();}
+function renderHeader(){var p=S.profile;$('hdrName').textContent=(p.name||'SVS').toUpperCase()+' — COMMAND CENTER';$('hdrSub').textContent=[p.owner,p.location,p.tagline].filter(Boolean).join(' · ').toUpperCase();applyBrand();applyCur();}
 function updSplitSum(){var s=(+$('sSplitP').value||0)+(+$('sSplitS').value||0)+(+$('sSplitT').value||0)+(+$('sSplitB').value||0);$('splitSum').textContent='Total: '+s+'%'+(s===100?' ✓':' — should be 100%');}
-function renderSetup(){var p=S.profile;$('sName').value=p.name;$('sOwner').value=p.owner;$('sTagline').value=p.tagline;$('sLocation').value=p.location;$('sEmail').value=p.email;$('sPhone').value=p.phone;$('sMomo').value=p.momo||'';$('sIg').value=p.ig;$('sCurrency').value=p.currency;$('sSplitP').value=p.split.Personal;$('sSplitS').value=p.split['Studio Growth'];$('sSplitT').value=p.split['Tax Provision'];$('sSplitB').value=p.split['Emergency Buffer'];updSplitSum();$('setupPkgs').innerHTML=p.packages.map(function(pk,i){return '<div class="row" style="margin-bottom:6px"><input style="flex:2;min-width:0" id="sP'+i+'name" value="'+(pk.name||'').replace(/"/g,'&quot;')+'"><input style="flex:1;min-width:0" id="sP'+i+'price" type="number" value="'+pk.price+'"></div>';}).join('');}
-function saveProfile(){var p=S.profile;p.name=$('sName').value.trim()||p.name;p.owner=$('sOwner').value;p.tagline=$('sTagline').value;p.location=$('sLocation').value;p.email=$('sEmail').value;p.phone=$('sPhone').value;p.momo=$('sMomo').value.trim();p.ig=$('sIg').value;p.currency=$('sCurrency').value.trim()||'GHS';p.split={Personal:+$('sSplitP').value||0,'Studio Growth':+$('sSplitS').value||0,'Tax Provision':+$('sSplitT').value||0,'Emergency Buffer':+$('sSplitB').value||0};p.packages=p.packages.map(function(pk,i){var nm=$('sP'+i+'name'),pr=$('sP'+i+'price');return {name:(nm&&nm.value.trim())||pk.name,price:(pr&&+pr.value)||0};});p.configured=true;save();renderAll();toast('Setup saved — applied across the dashboard');show(document.querySelector('.tab[data-k="today"]'),'today');}
+function renderSetup(){var p=S.profile;$('sName').value=p.name;$('sOwner').value=p.owner;$('sTagline').value=p.tagline;$('sLocation').value=p.location;$('sEmail').value=p.email;$('sPhone').value=p.phone;$('sMomo').value=p.momo||'';$('sIg').value=p.ig;curOptions($('sCurrency'),p.currencySymbol,p.currency);curPick();if($('qName')){$('qName').value=p.name||'';$('qOwner').value=p.owner||'';$('qPhone').value=p.phone||'';$('qEmail').value=p.email||'';$('qIg').value=p.ig||'';$('qLocation').value=p.location||'';curOptions($('qCurrency'),p.currencySymbol,p.currency);qCurPick();}$('sSplitP').value=p.split.Personal;$('sSplitS').value=p.split['Studio Growth'];$('sSplitT').value=p.split['Tax Provision'];$('sSplitB').value=p.split['Emergency Buffer'];updSplitSum();$('setupPkgs').innerHTML=p.packages.map(function(pk,i){return '<div class="row" style="margin-bottom:6px"><input style="flex:2;min-width:0" id="sP'+i+'name" value="'+(pk.name||'').replace(/"/g,'&quot;')+'"><input style="flex:1;min-width:0" id="sP'+i+'price" type="number" value="'+pk.price+'"></div>';}).join('');}
+function saveProfile(){var p=S.profile;p.name=$('sName').value.trim()||p.name;p.owner=$('sOwner').value;p.tagline=$('sTagline').value;p.location=$('sLocation').value;p.email=$('sEmail').value;p.phone=$('sPhone').value;p.momo=$('sMomo').value.trim();p.ig=$('sIg').value;var _c=parseCur($('sCurrency'),$('sCurSym'),$('sCurCode'));p.currency=_c.code;p.currencySymbol=_c.sym;p.split={Personal:+$('sSplitP').value||0,'Studio Growth':+$('sSplitS').value||0,'Tax Provision':+$('sSplitT').value||0,'Emergency Buffer':+$('sSplitB').value||0};p.packages=p.packages.map(function(pk,i){var nm=$('sP'+i+'name'),pr=$('sP'+i+'price');return {name:(nm&&nm.value.trim())||pk.name,price:(pr&&+pr.value)||0};});p.configured=true;save();renderAll();toast('Setup saved — applied across the dashboard');show(document.querySelector('.tab[data-k="today"]'),'today');}
 var RMAP={'t-home':function(){renderHome();renderHomeSubs();},'t-pipe':renderPipe,'t-cal':renderCal,'t-video':renderVideos,'t-money':function(){renderMoney();renderAnalytics();},'t-backup':renderBackup,'t-risk':renderRisk,'t-editing':renderEditing,'t-growth':renderGrowth,'t-plan':renderPlan,'t-tasks':renderTasks,'t-setup':renderSetup,'t-subs':renderSubs};
 function renderAll(){renderHeader();var any=false;for(var id in RMAP){var e=$(id);if(e&&e.classList.contains('on')){RMAP[id]();any=true;}}if(!any){renderHome();renderHomeSubs();}}
 function renderEverything(){renderHeader();for(var id in RMAP)RMAP[id]();}
@@ -1373,7 +1399,7 @@ function renderSubs(){
       return '<div class="client"><div class="row" style="justify-content:space-between"><div class="cn">'+esc(s.name)+'</div>'
         +'<button class="btn sm" onclick="toggleSubActive(\''+s.id+'\')">Reactivate</button></div></div>'; }).join('') : '';
   el.innerHTML=
-    '<div class="card"><div class="ct">&#128230; '+SUB_PLAN+' &middot; GHS '+SUB_PRICE+'/mo per client</div>'
+    '<div class="card"><div class="ct">&#128230; '+SUB_PLAN+' &middot; '+CUR()+' '+SUB_PRICE+'/mo per client</div>'
     +'<div class="muted" style="margin-bottom:10px">Auto-schedules 3 shoots/month into open <b>Mon–Thu, 9am–4pm</b>, batched by area. <b>Friday = edit day</b>. Max 3hr per slot, 2 slots/day.</div>'
     +'<div class="grid g2">'
     +'<div><label>Client name</label><input id="subName" placeholder="Business name"></div>'
@@ -1520,5 +1546,22 @@ if(SECURE){startAuth();}else{var _g=document.getElementById('authGate');if(_g)_g
 })();
 </script>
 
+<script>
+/* ===== currency changer + logo changer + quick start (added) ===== */
+var CURRENCIES=[['₵','GHS','Ghana Cedi'],['£','GBP','British Pound'],['$','USD','US Dollar'],['€','EUR','Euro'],['₦','NGN','Nigerian Naira'],['KSh','KES','Kenyan Shilling'],['R','ZAR','South African Rand'],['CFA','XOF','West African CFA'],['FCFA','XAF','Central African CFA'],['E£','EGP','Egyptian Pound'],['DH','MAD','Moroccan Dirham'],['TSh','TZS','Tanzanian Shilling'],['USh','UGX','Ugandan Shilling'],['FRw','RWF','Rwandan Franc'],['ZK','ZMW','Zambian Kwacha'],['¥','JPY','Japanese Yen'],['CN¥','CNY','Chinese Yuan'],['₹','INR','Indian Rupee'],['₩','KRW','South Korean Won'],['HK$','HKD','Hong Kong Dollar'],['S$','SGD','Singapore Dollar'],['RM','MYR','Malaysian Ringgit'],['฿','THB','Thai Baht'],['Rp','IDR','Indonesian Rupiah'],['₱','PHP','Philippine Peso'],['₫','VND','Vietnamese Dong'],['₨','PKR','Pakistani Rupee'],['৳','BDT','Bangladeshi Taka'],['C$','CAD','Canadian Dollar'],['A$','AUD','Australian Dollar'],['NZ$','NZD','New Zealand Dollar'],['Fr','CHF','Swiss Franc'],['kr','SEK','Swedish Krona'],['kr','NOK','Norwegian Krone'],['kr','DKK','Danish Krone'],['zł','PLN','Polish Zloty'],['Kč','CZK','Czech Koruna'],['Ft','HUF','Hungarian Forint'],['₺','TRY','Turkish Lira'],['₽','RUB','Russian Ruble'],['R$','BRL','Brazilian Real'],['Mex$','MXN','Mexican Peso'],['AR$','ARS','Argentine Peso'],['Dh','AED','UAE Dirham'],['SR','SAR','Saudi Riyal'],['QR','QAR','Qatari Riyal'],['₪','ILS','Israeli Shekel']];
+function curOptions(sel,sym,code){if(!sel)return;var found=false;var h=CURRENCIES.map(function(c){var on=(c[0]===sym&&c[1]===code);if(on)found=true;return '<option value="'+c[0]+'|'+c[1]+'"'+(on?' selected':'')+'>'+c[0]+' '+c[2]+' ('+c[1]+')</option>';}).join('');h+='<option value="custom|custom"'+(found?'':' selected')+'>Custom…</option>';sel.innerHTML=h;if(!found){var pre=(sel.id==='qCurrency')?'q':'s';var ss=document.getElementById(pre+'CurSym'),cc=document.getElementById(pre+'CurCode');if(ss)ss.value=sym||'';if(cc)cc.value=code||'';}}
+function curPick(){var s=document.getElementById('sCurrency'),w=document.getElementById('sCurCustom');if(s&&w)w.style.display=(s.value==='custom|custom')?'':'none';}
+function qCurPick(){var s=document.getElementById('qCurrency'),w=document.getElementById('qCurCustomWrap');if(s&&w)w.style.display=(s.value==='custom|custom')?'':'none';}
+function parseCur(sel,symEl,codeEl){if(!sel)return {sym:'₵',code:'GHS'};var v=sel.value||'';if(v==='custom|custom'){return {sym:((symEl&&symEl.value.trim())||'₵'),code:((codeEl&&codeEl.value.trim())||'GHS')};}var a=v.split('|');return {sym:a[0]||'₵',code:a[1]||'GHS'};}
+function CUR(){var p=S.profile||{};return p.currency||'GHS';}
+function applyCur(){var c=CUR();var els=document.querySelectorAll('.curcode');for(var i=0;i<els.length;i++){els[i].textContent=c;}}
+function initials(nm){nm=(nm||'').trim();if(!nm)return 'STU';var w=nm.split(/\s+/).filter(Boolean);var t=(w.length>=2)?(w[0][0]+w[1][0]+(w[2]?w[2][0]:'')):nm.slice(0,3);return t.toUpperCase();}
+function monogramURL(nm){var t=initials(nm);var svg='<svg xmlns="http://www.w3.org/2000/svg" width="120" height="140" viewBox="0 0 120 140"><text x="60" y="99" font-family="Georgia,serif" font-size="60" font-weight="700" text-anchor="middle" fill="#b08d57">'+t+'</text></svg>';return 'data:image/svg+xml,'+encodeURIComponent(svg);}
+function applyBrand(){var p=S.profile||{};var root=document.documentElement;var url=null;if(p.logo&&p.logo.indexOf('data:')===0)url=p.logo;else if(p.logo==='text')url=monogramURL(p.name);if(url)root.style.setProperty('--svswm',"url('"+url+"')");else root.style.removeProperty('--svswm');var lp=document.getElementById('logoPrev');if(lp)lp.textContent=(p.logo&&p.logo.indexOf('data:')===0)?'✓ Using your uploaded image.':(p.logo==='text'?('✓ Using text monogram: '+initials(p.name)):'Using the default logo.');}
+function logoUpload(e){var f=e.target.files&&e.target.files[0];if(!f)return;if(f.size>500*1024)toast('Large image ('+Math.round(f.size/1024)+'KB) — a smaller PNG stores lighter');var r=new FileReader();r.onload=function(){S.profile.logo=r.result;save();applyBrand();renderHeader();toast('Logo updated');};r.readAsDataURL(f);}
+function logoText(){S.profile.logo='text';save();applyBrand();renderHeader();toast('Text monogram applied');}
+function logoReset(){S.profile.logo='';save();applyBrand();renderHeader();toast('Logo reset to default');}
+function quickApply(){var p=S.profile;p.name=document.getElementById('qName').value.trim()||p.name;p.owner=document.getElementById('qOwner').value.trim();p.phone=document.getElementById('qPhone').value.trim();p.email=document.getElementById('qEmail').value.trim();p.ig=document.getElementById('qIg').value.trim();p.location=document.getElementById('qLocation').value.trim();var c=parseCur(document.getElementById('qCurrency'),document.getElementById('qCurSym'),document.getElementById('qCurCode'));p.currency=c.code;p.currencySymbol=c.sym;p.configured=true;save();applyBrand();renderAll();try{renderSetup();}catch(e){}toast('Applied everywhere');var tb=document.querySelector('.tab[data-k="today"]');if(tb)show(tb,'today');}
+</script>
 </body>
 </html>
